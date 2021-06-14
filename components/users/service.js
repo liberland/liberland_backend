@@ -37,7 +37,6 @@ const signUp = async (ctx) => {
     const deserializedUser = {
       email: user.get('email'),
       id: user.get('id'),
-      address: user.get('address'),
       role: user.get('role'),
     };
     await ctx.login(deserializedUser);
@@ -55,7 +54,7 @@ const signIn = async (ctx) => {
 
   const user = await UserModel.findOne({
     where: { email },
-    attributes: ['id', 'address', 'email', 'role', ['password', 'hashedPassword']],
+    attributes: ['id', 'email', 'role', ['password', 'hashedPassword']],
   });
 
   if (user) {
@@ -67,7 +66,6 @@ const signIn = async (ctx) => {
       const deserializedUser = {
         email: user.get('email'),
         id: user.get('id'),
-        address: user.get('address'),
         role: user.get('role'),
       };
       await ctx.login(deserializedUser);

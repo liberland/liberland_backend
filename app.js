@@ -9,11 +9,9 @@ const passport = require('koa-passport');
 const cors = require('@koa/cors');
 const qs = require('koa-qs');
 const { memoryStore } = require('./db');
-// MIDDLEWARES
 
 // ROUTES
-
-// CONTROLLERS
+const { usersRouter } = require('./components/users');
 
 // APP
 const app = new Koa();
@@ -78,5 +76,8 @@ app.use(async (ctx, next) => {
     ctx.app.emit('error', err, ctx);
   }
 });
+
+app.use(usersRouter.routes());
+app.use(usersRouter.allowedMethods());
 
 app.listen(process.env.PORT || 3000);
