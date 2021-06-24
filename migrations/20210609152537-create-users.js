@@ -18,6 +18,34 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      origin: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      about: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      lastName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      languages: {
+        type: Sequelize.ARRAY(Sequelize.STRING),
+        allowNull: false,
+      },
+      occupation: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      gender: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
