@@ -20,7 +20,18 @@ const checkSession = async (ctx) => {
 };
 
 const signUp = async (ctx) => {
-  const { email, password, role } = ctx.request.body;
+  const {
+    email,
+    password,
+    role,
+    origin,
+    about,
+    name,
+    lastName,
+    languages,
+    occupation,
+    gender,
+  } = ctx.request.body;
 
   if (!email) ctx.throw(400, 'Email is required');
   if (!password) ctx.throw(400, 'Password is required');
@@ -30,7 +41,17 @@ const signUp = async (ctx) => {
 
   const [user, created] = await UserModel.findOrCreate({
     where: { email },
-    defaults: { password: hashedPassword, role },
+    defaults: {
+      password: hashedPassword,
+      role,
+      origin,
+      about,
+      name,
+      lastName,
+      languages,
+      occupation,
+      gender,
+    },
   });
 
   if (created) {
@@ -72,7 +93,7 @@ const signIn = async (ctx) => {
       'languages',
       'occupation',
       'gender',
-      ['password', 'hashedPassword']
+      ['password', 'hashedPassword'],
     ],
   });
 

@@ -30,13 +30,28 @@ app.use(
 );
 
 passport.serializeUser(({
-  id, address, email, role,
+  id,
+  address,
+  email,
+  role,
+  about,
+  name,
+  lastName,
+  languages,
+  occupation,
+  gender,
 }, done) => {
   done(null, {
     id,
     address,
     email,
     role,
+    about,
+    name,
+    lastName,
+    languages,
+    occupation,
+    gender,
   });
 });
 
