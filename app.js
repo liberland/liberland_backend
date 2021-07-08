@@ -40,6 +40,7 @@ passport.serializeUser(({
   languages,
   occupation,
   gender,
+  origin,
 }, done) => {
   done(null, {
     id,
@@ -52,6 +53,7 @@ passport.serializeUser(({
     languages,
     occupation,
     gender,
+    origin,
   });
 });
 
