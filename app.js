@@ -12,6 +12,7 @@ const { memoryStore } = require('./db');
 
 // ROUTES
 const { usersRouter } = require('./components/users');
+const { assemblyRouter } = require('./components/assembly');
 
 // APP
 const app = new Koa();
@@ -96,5 +97,7 @@ app.use(async (ctx, next) => {
 
 app.use(usersRouter.routes());
 app.use(usersRouter.allowedMethods());
+app.use(assemblyRouter.routes());
+app.use(assemblyRouter.allowedMethods());
 
 app.listen(process.env.PORT || 3000);
