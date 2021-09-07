@@ -9,6 +9,11 @@ function WritePdfFileException(message) {
 }
 
 const writePdfFile = async (file, fileName) => {
+
+  if (!fs.existsSync('./proposals')) {
+    fs.mkdirSync('./proposals');
+  }
+
   const filePath = `./proposals/${fileName}.pdf`;
   const buf = () => Buffer.from(filePath, 'base64');
   if (buf) {
@@ -16,6 +21,22 @@ const writePdfFile = async (file, fileName) => {
     return (filePath);
   }
   throw new WritePdfFileException('Write file is fail');
+};
+
+const removeProposalFile = async (ctx, filename) => {
+  const filePath = `./proposals/${filename}.pdf`;
+
+  fs.stat(filePath, (err) => {
+    if (err) {
+      ctx.throw(500, 'Error during file deletion');
+    }
+
+    fs.unlink(filePath, (e) => {
+      if (e) {
+        ctx.throw(500, 'Error during file deletion');
+      }
+    });
+  });
 };
 
 const writeDataToDb = (filePath) => new Promise((resolve, reject) => {
@@ -91,6 +112,7 @@ const deleteDraft = async (ctx) => {
     return;
   }
 
+  removeProposalFile(ctx, proposal.fileName);
   await proposal.destroy();
   ctx.status = 204;
 };
@@ -112,6 +134,8 @@ const editDraft = async (ctx) => {
       threadLink,
       fileName,
     } = await ctx.request.body;
+    removeProposalFile(ctx, proposal.fileName);
+
     await writePdfFile(file, fileName);
     proposal.proposalName = proposalName;
     proposal.fileName = fileName;
