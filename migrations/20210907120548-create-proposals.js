@@ -38,6 +38,9 @@ module.exports = {
       votingHourLeft: {
         type: Sequelize.STRING
       },
+      docHash: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
