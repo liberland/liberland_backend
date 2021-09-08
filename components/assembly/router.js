@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 
 const {
-  addNewDraft, getMyProposals, deleteDraft, editDraft, getProposalsByHash, verifyProposalHash
+  addNewDraft, getMyProposals, deleteDraft, editDraft, getProposalsByHash, verifyProposalHash,
 } = require('./service');
 
 const router = new Router({

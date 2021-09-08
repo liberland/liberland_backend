@@ -17,7 +17,6 @@ const numToBuf = (num) => {
 };
 
 const writePdfFile = async (file, fileName) => {
-
   if (!fs.existsSync('./proposals')) {
     fs.mkdirSync('./proposals');
   }
@@ -120,8 +119,6 @@ const verifyProposalHash = async (ctx) => {
   const proposal = await getProposal(ctx.params.id);
   const newHash = await getProposalFileHash(proposal.fileName, proposal.createdDate);
 
-  console.log('hashes', proposal.docHash, newHash);
-
   if (proposal.docHash !== newHash) {
     ctx.throw(500, 'Hashes not identical');
   }
@@ -136,8 +133,6 @@ const getMyProposals = async (ctx) => {
       userId,
     },
   });
-
-  console.log('propsals', ctx.body);
 };
 
 const getProposalsByHash = async (ctx) => {
