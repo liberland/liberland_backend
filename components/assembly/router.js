@@ -1,7 +1,13 @@
 const Router = require('koa-router');
 
 const {
-  addNewDraft, getMyProposals, deleteDraft, editDraft, getProposalsByHash, verifyProposalHash,
+  addNewDraft,
+  getMyProposals,
+  deleteDraft,
+  editDraft,
+  getProposalsByHash,
+  verifyProposalHash,
+  updateStatusProposal,
 } = require('./service');
 
 const router = new Router({
@@ -14,5 +20,6 @@ router.post('/get_my_proposals', getMyProposals);
 router.post('/proposals_hashes', getProposalsByHash);
 router.patch('/edit_draft/:id', editDraft);
 router.delete('/delete_draft/:id', deleteDraft);
+router.patch('/update_status_proposal', updateStatusProposal);
 
 module.exports = router;
