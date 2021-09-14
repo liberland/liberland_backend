@@ -1,6 +1,7 @@
 const pdfParse = require('pdf-parse');
 const base64 = require('base64topdf');
 const fs = require('fs');
+const crypto = require('crypto');
 const { proposals: ProposalsModel } = require('../../models');
 
 function WritePdfFileException(message) {
@@ -8,8 +9,14 @@ function WritePdfFileException(message) {
   this.name = 'Custom exception';
 }
 
-const writePdfFile = async (file, fileName) => {
+const numToBuf = (num) => {
+  const b = new ArrayBuffer(4);
+  new DataView(b).setUint32(0, num);
+  const arr = Array.from(new Uint8Array(b));
+  return Buffer.from(arr);
+};
 
+const writePdfFile = async (file, fileName) => {
   if (!fs.existsSync('./proposals')) {
     fs.mkdirSync('./proposals');
   }
@@ -48,6 +55,16 @@ const writeDataToDb = (filePath) => new Promise((resolve, reject) => {
   });
 });
 
+const getProposalFileHash = async (fileName, timeStamp) => {
+  const filePath = `./proposals/${fileName}.pdf`;
+  const file = fs.readFileSync(filePath);
+  const data = await pdfParse(file);
+  const hash = crypto.createHash('sha256');
+  hash.update(data.text);
+  hash.update(numToBuf(timeStamp));
+  return hash.digest('hex');
+};
+
 const addNewDraft = async (ctx) => {
   try {
     const {
@@ -64,6 +81,9 @@ const addNewDraft = async (ctx) => {
     } = await ctx.request.body;
 
     await writePdfFile(file, fileName);
+
+    const docHash = await getProposalFileHash(fileName, createdDate);
+
     await ProposalsModel.create({
       userId,
       proposalStatus: 0,
@@ -75,20 +95,12 @@ const addNewDraft = async (ctx) => {
       requiredAmountLlm,
       currentLlm,
       votingHourLeft,
+      docHash,
     });
   } catch (e) {
     ctx.throw(500, e);
   }
   ctx.status = 200;
-};
-
-const getMyProposals = async (ctx) => {
-  const { userId } = ctx.request.body;
-  ctx.body = await ProposalsModel.findAll({
-    where: {
-      userId,
-    },
-  });
 };
 
 const getProposal = async (id) => {
@@ -101,6 +113,34 @@ const getProposal = async (id) => {
     throw new Error('Proposal not found');
   }
   return proposal;
+};
+
+const verifyProposalHash = async (ctx) => {
+  const proposal = await getProposal(ctx.params.id);
+  const newHash = await getProposalFileHash(proposal.fileName, proposal.createdDate);
+
+  if (proposal.docHash !== newHash) {
+    ctx.throw(500, 'Hashes not identical');
+  }
+
+  ctx.body = newHash;
+};
+
+const getMyProposals = async (ctx) => {
+  const { userId } = ctx.request.body;
+  ctx.body = await ProposalsModel.findAll({
+    where: {
+      userId,
+    },
+  });
+};
+
+const getProposalsByHash = async (ctx) => {
+  ctx.body = await ProposalsModel.findAll({
+    where: {
+      docHash: ctx.request.body.hashes,
+    },
+  });
 };
 
 const deleteDraft = async (ctx) => {
@@ -137,10 +177,15 @@ const editDraft = async (ctx) => {
     removeProposalFile(ctx, proposal.fileName);
 
     await writePdfFile(file, fileName);
+
+    const docHash = await getProposalFileHash(fileName, proposal.createdDate);
+
     proposal.proposalName = proposalName;
     proposal.fileName = fileName;
     proposal.shortDescription = shortDescription;
     proposal.threadLink = threadLink;
+    proposal.docHash = docHash;
+
     await proposal.save();
   } catch (e) {
     ctx.throw(500, e);
@@ -153,4 +198,6 @@ module.exports = {
   getMyProposals,
   deleteDraft,
   editDraft,
+  getProposalsByHash,
+  verifyProposalHash,
 };

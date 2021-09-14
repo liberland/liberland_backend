@@ -12,8 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
-  }
-
+  };
   proposals.init({
     userId: DataTypes.INTEGER,
     proposalStatus: DataTypes.INTEGER,
@@ -25,10 +24,10 @@ module.exports = (sequelize, DataTypes) => {
     requiredAmountLlm: DataTypes.INTEGER,
     currentLlm: DataTypes.INTEGER,
     votingHourLeft: DataTypes.STRING,
+    docHash: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'proposals',
   });
-
   return proposals;
 };
