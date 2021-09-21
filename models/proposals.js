@@ -15,16 +15,18 @@ module.exports = (sequelize, DataTypes) => {
   };
   proposals.init({
     userId: DataTypes.INTEGER,
-    proposalStatus: DataTypes.INTEGER,
+    proposalStatus: DataTypes.STRING,
     proposalName: DataTypes.STRING,
     fileName: DataTypes.STRING,
     shortDescription: DataTypes.STRING,
     threadLink: DataTypes.STRING,
     createdDate: DataTypes.STRING,
-    requiredAmountLlm: DataTypes.INTEGER,
-    currentLlm: DataTypes.INTEGER,
+    requiredAmountLlm: DataTypes.STRING,
+    currentLlm: DataTypes.STRING,
     votingHourLeft: DataTypes.STRING,
-    docHash: DataTypes.STRING
+    docHash: DataTypes.STRING,
+    draftType: DataTypes.STRING,
+    nodeIdProposel: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'proposals',
