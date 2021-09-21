@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       proposalStatus: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       proposalName: {
         type: Sequelize.STRING
@@ -30,15 +30,21 @@ module.exports = {
         type: Sequelize.STRING
       },
       requiredAmountLlm: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       currentLlm: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       votingHourLeft: {
         type: Sequelize.STRING
       },
       docHash: {
+        type: Sequelize.STRING
+      },
+      draftType: {
+        type: Sequelize.STRING
+      },
+      nodeIdProposel: {
         type: Sequelize.STRING
       },
       createdAt: {

@@ -2,7 +2,7 @@ const pdfParse = require('pdf-parse');
 const base64 = require('base64topdf');
 const fs = require('fs');
 const crypto = require('crypto');
-const { where } = require('sequelize');
+const { Op } = require('sequelize');
 const { proposals: ProposalsModel } = require('../../models');
 
 function WritePdfFileException(message) {
@@ -79,6 +79,8 @@ const addNewDraft = async (ctx) => {
       requiredAmountLlm,
       currentLlm,
       votingHourLeft,
+      draftType,
+      proposalStatus,
     } = await ctx.request.body;
 
     await writePdfFile(file, fileName);
@@ -87,7 +89,7 @@ const addNewDraft = async (ctx) => {
 
     await ProposalsModel.create({
       userId,
-      proposalStatus: 0,
+      proposalStatus,
       proposalName,
       fileName,
       shortDescription,
@@ -97,6 +99,7 @@ const addNewDraft = async (ctx) => {
       currentLlm,
       votingHourLeft,
       docHash,
+      draftType,
     });
   } catch (e) {
     ctx.throw(500, e);
@@ -120,11 +123,28 @@ const verifyProposalHash = async (ctx) => {
   const proposal = await getProposal(ctx.params.id);
   const newHash = await getProposalFileHash(proposal.fileName, proposal.createdDate);
 
+  console.log('proposal.docHash ', proposal.docHash);
+  console.log('newHash ', newHash);
+
   if (proposal.docHash !== newHash) {
     ctx.throw(500, 'Hashes not identical');
   }
 
   ctx.body = newHash;
+};
+
+const calcHash = async (ctx) => {
+  const proposal = await getProposal(ctx.params.id);
+  const hash = await getProposalFileHash(proposal.fileName, proposal.createdDate);
+
+  console.log('proposal.docHash ', proposal.docHash);
+  console.log('newHash ', hash);
+
+  if (proposal.docHash !== hash) {
+    ctx.throw(500, 'Hashes not identical');
+  }
+
+  ctx.body = { hash, proposalType: proposal.draftType };
 };
 
 const getMyProposals = async (ctx) => {
@@ -174,6 +194,7 @@ const editDraft = async (ctx) => {
       shortDescription,
       threadLink,
       fileName,
+      draftType,
     } = await ctx.request.body;
     removeProposalFile(ctx, proposal.fileName);
 
@@ -186,6 +207,7 @@ const editDraft = async (ctx) => {
     proposal.shortDescription = shortDescription;
     proposal.threadLink = threadLink;
     proposal.docHash = docHash;
+    proposal.draftType = draftType;
 
     await proposal.save();
   } catch (e) {
@@ -202,6 +224,7 @@ const updateStatusProposal = async (ctx) => {
       requiredAmountLlm,
       currentLlm,
       votingHourLeft,
+      nodeIdProposel,
     } = ctx.request.body;
 
     await ProposalsModel.update({
@@ -209,6 +232,7 @@ const updateStatusProposal = async (ctx) => {
       requiredAmountLlm,
       currentLlm,
       votingHourLeft,
+      nodeIdProposel,
     },
     {
       where: {
@@ -221,6 +245,56 @@ const updateStatusProposal = async (ctx) => {
   }
 };
 
+const getProposalsNotDraft = async () => ({
+  proposals: await ProposalsModel.findAll({
+    where: {
+      [Op.not]: [
+        {
+          proposalStatus: 'Draft',
+        },
+      ],
+    },
+  }),
+});
+
+const updateAllProposals = async (ctx) => {
+  try {
+    const { hashesAllProposals } = ctx.request.body;
+    if (hashesAllProposals === 'IsEmpty') {
+      ctx.status = 200;
+      return;
+    }
+    await hashesAllProposals.map(async (proposal) => {
+      await ProposalsModel.update({
+        proposalStatus: proposal.state,
+      },
+      {
+        where: {
+          docHash: proposal.docHash,
+        },
+      }).catch((e) => console.log('Error in updateAllProposals', e));
+    });
+    ctx.body = await getProposalsNotDraft();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+const getHashesProposalsNotDraft = async (ctx) => {
+  ctx.body = {
+    hashesNotDraft: await ProposalsModel.findAll({
+      attributes: ['docHash'],
+      where: {
+        [Op.not]: [
+          {
+            proposalStatus: 'Draft',
+          },
+        ],
+      },
+    }),
+  };
+};
+
 module.exports = {
   addNewDraft,
   getMyProposals,
@@ -229,4 +303,7 @@ module.exports = {
   getProposalsByHash,
   verifyProposalHash,
   updateStatusProposal,
+  updateAllProposals,
+  getHashesProposalsNotDraft,
+  calcHash,
 };
