@@ -195,6 +195,7 @@ const editDraft = async (ctx) => {
       threadLink,
       fileName,
       draftType,
+      requiredAmountLlm,
     } = await ctx.request.body;
     removeProposalFile(ctx, proposal.fileName);
 
@@ -208,6 +209,7 @@ const editDraft = async (ctx) => {
     proposal.threadLink = threadLink;
     proposal.docHash = docHash;
     proposal.draftType = draftType;
+    proposal.requiredAmountLlm = requiredAmountLlm;
 
     await proposal.save();
   } catch (e) {
@@ -285,14 +287,31 @@ const getHashesProposalsNotDraft = async (ctx) => {
     hashesNotDraft: await ProposalsModel.findAll({
       attributes: ['docHash'],
       where: {
-        [Op.not]: [
-          {
-            proposalStatus: 'Draft',
-          },
-        ],
+        proposalStatus: 'InProgress',
       },
     }),
   };
+};
+
+const voteByProposal = async (ctx) => {
+  try {
+    const { docHash, memberPower } = ctx.request.body;
+    if (docHash === 'IsEmpty') {
+      ctx.status = 200;
+      return;
+    }
+    await ProposalsModel.update({
+      currentLlm: memberPower,
+    },
+    {
+      where: {
+        docHash,
+      },
+    }).catch((e) => console.log('Error in updateAllProposals', e));
+    ctx.body = await getProposalsNotDraft();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 module.exports = {
@@ -306,4 +325,5 @@ module.exports = {
   updateAllProposals,
   getHashesProposalsNotDraft,
   calcHash,
+  voteByProposal,
 };
