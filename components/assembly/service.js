@@ -287,7 +287,11 @@ const getHashesProposalsNotDraft = async (ctx) => {
     hashesNotDraft: await ProposalsModel.findAll({
       attributes: ['docHash'],
       where: {
-        proposalStatus: 'InProgress',
+        [Op.not]: [
+          {
+            proposalStatus: ['Draft', 'Declined'],
+          },
+        ],
       },
     }),
   };
