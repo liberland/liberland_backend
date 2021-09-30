@@ -227,6 +227,7 @@ const updateStatusProposal = async (ctx) => {
       currentLlm,
       votingHourLeft,
       nodeIdProposel,
+      draftType,
     } = ctx.request.body;
 
     await ProposalsModel.update({
@@ -235,6 +236,7 @@ const updateStatusProposal = async (ctx) => {
       currentLlm,
       votingHourLeft,
       nodeIdProposel,
+      draftType,
     },
     {
       where: {
@@ -297,15 +299,15 @@ const getHashesProposalsNotDraft = async (ctx) => {
   };
 };
 
-const voteByProposal = async (ctx) => {
+const updatePowerProposal = async (ctx) => {
   try {
-    const { docHash, memberPower } = ctx.request.body;
+    const { docHash, votePower } = ctx.request.body;
     if (docHash === 'IsEmpty') {
       ctx.status = 200;
       return;
     }
     await ProposalsModel.update({
-      currentLlm: memberPower,
+      currentLlm: votePower,
     },
     {
       where: {
@@ -329,5 +331,5 @@ module.exports = {
   updateAllProposals,
   getHashesProposalsNotDraft,
   calcHash,
-  voteByProposal,
+  updatePowerProposal,
 };

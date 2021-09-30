@@ -11,7 +11,7 @@ const {
   updateAllProposals,
   getHashesProposalsNotDraft,
   calcHash,
-  voteByProposal,
+  updatePowerProposal,
 } = require('./service');
 
 const router = new Router({
@@ -28,6 +28,6 @@ router.delete('/delete_draft/:id', deleteDraft);
 router.patch('/update_status_proposal', updateStatusProposal);
 router.post('/update_all_proposals', updateAllProposals);
 router.get('/get_hashes_proposals_not_draft', getHashesProposalsNotDraft);
-router.post('/vote_by_proposal', voteByProposal);
+router.patch('/update_power_proposal', updatePowerProposal);
 
 module.exports = router;
