@@ -12,6 +12,8 @@ const {
   getHashesProposalsNotDraft,
   calcHash,
   updatePowerProposal,
+  getProposalsByStatusAndType,
+  getAllProposalsApproved,
 } = require('./service');
 
 const router = new Router({
@@ -29,5 +31,7 @@ router.patch('/update_status_proposal', updateStatusProposal);
 router.post('/update_all_proposals', updateAllProposals);
 router.get('/get_hashes_proposals_not_draft', getHashesProposalsNotDraft);
 router.patch('/update_power_proposal', updatePowerProposal);
+router.post('/get_proposals_byStatus_and_type', getProposalsByStatusAndType);
+router.get('/get_all_proposals_approved', getAllProposalsApproved);
 
 module.exports = router;

@@ -2,7 +2,7 @@ const pdfParse = require('pdf-parse');
 const base64 = require('base64topdf');
 const fs = require('fs');
 const crypto = require('crypto');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const { proposals: ProposalsModel } = require('../../models');
 
 function WritePdfFileException(message) {
@@ -320,6 +320,35 @@ const updatePowerProposal = async (ctx) => {
   }
 };
 
+const getProposalsByStatusAndType = async (ctx) => {
+  try {
+    const { status, type } = ctx.request.body;
+    ctx.body = {
+      proposals: await ProposalsModel.findAll({
+        where: {
+          [Op.and]: [{ proposalStatus: status }, { draftType: type }],
+        },
+      }),
+    };
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+const getAllProposalsApproved = async (ctx) => {
+  try {
+    ctx.body = {
+      proposals: await ProposalsModel.findAll({
+        where: {
+          proposalStatus: 'Approved',
+        },
+      }),
+    };
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
 module.exports = {
   addNewDraft,
   getMyProposals,
@@ -332,4 +361,6 @@ module.exports = {
   getHashesProposalsNotDraft,
   calcHash,
   updatePowerProposal,
+  getProposalsByStatusAndType,
+  getAllProposalsApproved,
 };
