@@ -2,7 +2,7 @@ const pdfParse = require('pdf-parse');
 const base64 = require('base64topdf');
 const fs = require('fs');
 const crypto = require('crypto');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const { proposals: ProposalsModel } = require('../../models');
 
 function WritePdfFileException(message) {
@@ -195,6 +195,7 @@ const editDraft = async (ctx) => {
       threadLink,
       fileName,
       draftType,
+      requiredAmountLlm,
     } = await ctx.request.body;
     removeProposalFile(ctx, proposal.fileName);
 
@@ -208,6 +209,7 @@ const editDraft = async (ctx) => {
     proposal.threadLink = threadLink;
     proposal.docHash = docHash;
     proposal.draftType = draftType;
+    proposal.requiredAmountLlm = requiredAmountLlm;
 
     await proposal.save();
   } catch (e) {
@@ -225,6 +227,7 @@ const updateStatusProposal = async (ctx) => {
       currentLlm,
       votingHourLeft,
       nodeIdProposel,
+      draftType,
     } = ctx.request.body;
 
     await ProposalsModel.update({
@@ -233,6 +236,7 @@ const updateStatusProposal = async (ctx) => {
       currentLlm,
       votingHourLeft,
       nodeIdProposel,
+      draftType,
     },
     {
       where: {
@@ -287,12 +291,62 @@ const getHashesProposalsNotDraft = async (ctx) => {
       where: {
         [Op.not]: [
           {
-            proposalStatus: 'Draft',
+            proposalStatus: ['Draft', 'Declined'],
           },
         ],
       },
     }),
   };
+};
+
+const updatePowerProposal = async (ctx) => {
+  try {
+    const { docHash, votePower } = ctx.request.body;
+    if (docHash === 'IsEmpty') {
+      ctx.status = 200;
+      return;
+    }
+    await ProposalsModel.update({
+      currentLlm: votePower,
+    },
+    {
+      where: {
+        docHash,
+      },
+    }).catch((e) => console.log('Error in updateAllProposals', e));
+    ctx.body = await getProposalsNotDraft();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+const getProposalsByStatusAndType = async (ctx) => {
+  try {
+    const { status, type } = ctx.request.body;
+    ctx.body = {
+      proposals: await ProposalsModel.findAll({
+        where: {
+          [Op.and]: [{ proposalStatus: status }, { draftType: type }],
+        },
+      }),
+    };
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
+const getAllProposalsApproved = async (ctx) => {
+  try {
+    ctx.body = {
+      proposals: await ProposalsModel.findAll({
+        where: {
+          proposalStatus: 'Approved',
+        },
+      }),
+    };
+  } catch (e) {
+    ctx.throw(500, e);
+  }
 };
 
 module.exports = {
@@ -306,4 +360,7 @@ module.exports = {
   updateAllProposals,
   getHashesProposalsNotDraft,
   calcHash,
+  updatePowerProposal,
+  getProposalsByStatusAndType,
+  getAllProposalsApproved,
 };
