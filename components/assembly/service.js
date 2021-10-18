@@ -349,6 +349,21 @@ const getAllProposalsApproved = async (ctx) => {
   }
 };
 
+const getInProgressProposals = async (ctx) => {
+  try {
+    ctx.body = {
+      proposals: await ProposalsModel.findAll({
+        where: {
+          proposalStatus: 'InProgress',
+          draftType: ctx.request.query.draftType,
+        },
+      }),
+    };
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
+
 module.exports = {
   addNewDraft,
   getMyProposals,
@@ -363,4 +378,5 @@ module.exports = {
   updatePowerProposal,
   getProposalsByStatusAndType,
   getAllProposalsApproved,
+  getInProgressProposals,
 };
