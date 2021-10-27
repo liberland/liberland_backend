@@ -364,6 +364,22 @@ const getInProgressProposals = async (ctx) => {
   }
 };
 
+const getTextPdf = async (ctx) => {
+  const proposalId = ctx.params.id;
+  console.log('proposalId proposalId proposalId ', proposalId);
+
+  const fileName = await ProposalsModel.findOne({
+    attributes: ['fileName'],
+    where: {
+      id: proposalId,
+    },
+  }).then((res) => res.dataValues.fileName);
+
+  const filePath = `./proposals/${fileName}.pdf`;
+  const file = fs.readFileSync(filePath);
+  ctx.response.body = await pdfParse(file);
+};
+
 module.exports = {
   addNewDraft,
   getMyProposals,
@@ -379,4 +395,5 @@ module.exports = {
   getProposalsByStatusAndType,
   getAllProposalsApproved,
   getInProgressProposals,
+  getTextPdf,
 };
