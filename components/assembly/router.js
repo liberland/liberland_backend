@@ -14,6 +14,8 @@ const {
   updatePowerProposal,
   getProposalsByStatusAndType,
   getAllProposalsApproved,
+  getInProgressProposals,
+  getTextPdf,
 } = require('./service');
 
 const router = new Router({
@@ -33,5 +35,7 @@ router.get('/get_hashes_proposals_not_draft', getHashesProposalsNotDraft);
 router.patch('/update_power_proposal', updatePowerProposal);
 router.post('/get_proposals_byStatus_and_type', getProposalsByStatusAndType);
 router.get('/get_all_proposals_approved', getAllProposalsApproved);
+router.get('/get_in_progress_proposals', getInProgressProposals);
+router.get('/get_text_pdf/:id', getTextPdf);
 
 module.exports = router;
