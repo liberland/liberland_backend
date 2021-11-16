@@ -23,16 +23,18 @@ const insertTxToDb = async (ctx) => {
   ctx.status = 200;
 };
 
-const getAllTxByAddress = async (ctx) => {
+const getMoreTx = async (ctx) => {
   try {
-    const { walletAddress } = ctx.request.body;
+    const { walletAddress, offset } = ctx.request.body;
     ctx.body = {
-      hashesNotDraft: await WalletTxModel.findAll({
+      historyTx: await WalletTxModel.findAll({
         where: {
           [Op.or]: [
             { account_from: walletAddress }, { account_to: walletAddress },
           ],
         },
+        offset,
+        limit: 7,
       }),
     };
   } catch (e) {
@@ -43,7 +45,7 @@ const getTreeTx = async (ctx) => {
   try {
     const { walletAddress } = ctx.request.body;
     ctx.body = {
-      threeTx: await WalletTxModel.findAll({
+      threeTx: await WalletTxModel.findAndCountAll({
         where: {
           [Op.or]: [
             { account_from: walletAddress }, { account_to: walletAddress },
@@ -60,6 +62,6 @@ const getTreeTx = async (ctx) => {
 
 module.exports = {
   insertTxToDb,
-  getAllTxByAddress,
+  getMoreTx,
   getTreeTx,
 };

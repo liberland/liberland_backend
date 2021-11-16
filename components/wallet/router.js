@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 const {
   insertTxToDb,
-  getAllTxByAddress,
+  getMoreTx,
   getTreeTx,
 } = require('./service');
 
@@ -10,7 +10,7 @@ const router = new Router({
 });
 
 router.post('/insert_tx', insertTxToDb);
-router.get('/get_all_tx_by_address', getAllTxByAddress);
+router.post('/get_more_tx', getMoreTx);
 router.post('/get_tree_tx', getTreeTx);
 // router.get();
 module.exports = router;
